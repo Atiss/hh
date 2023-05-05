@@ -19,9 +19,11 @@ contract Staking is Ownable {
 
     mapping(address => Stake) public stakes;
     mapping(address => uint256) public stakingTime;
+    address[] public whitelist;
 
     uint256 public constant PERIOD = 2 minutes;
     uint256 public constant PERCENT = 10;
+    uint256 public constant AIR_DROP = 200;
 
     constructor(address _usdtErc20, address _theRomaToken) {
         usdtErc20 = IERC20R(_usdtErc20);
@@ -55,6 +57,17 @@ contract Staking is Ownable {
         uint256 reward = stakes[msg.sender].amount * PERCENT * (block.timestamp - stakes[msg.sender].time) / PERIOD;
         stakes[msg.sender].time = block.timestamp;
         theRomaToken.mint(msg.sender, reward);
+    }
+
+    function addWhitelist(address _address) external onlyOwner {
+        whitelist.push(_address);
+    }
+
+    function airDrop() external onlyOwner{
+        for (uint256 i = 0; i < whitelist.length; i++) {
+            address _address = whitelist[i];
+            theRomaToken.mint(_address, AIR_DROP);
+        }
     }
 
 }
